@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eiken Score Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        #score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        #score-table th,
+        #score-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Eiken Score Management</h1>
+
+        <!-- Score Input -->
+        <div>
+            <h2>Score Input</h2>
+            <label for="session">Exam Session: </label>
+            <input type="text" id="session" /><br>
+
+            <label for="date">Exam Date (YYYY-MM-DD): </label>
+            <input type="date" id="date" /><br>
+
+            <label for="reading">Reading (41 questions): </label>
+            <input type="number" id="reading" /><br>
+
+            <label for="listening">Listening (29 questions): </label>
+            <input type="number" id="listening" /><br>
+
+            <label for="writing">Writing: </label>
+            <input type="text" id="writing" /><br><br>
+
+            <button class="btn" onclick="saveData()">Save Score</button>
+            <button class="btn" onclick="clearFields()">Clear Fields</button>
+        </div>
+
+        <!-- Score Table -->
+        <h2>Score History</h2>
+        <table id="score-table">
+            <thead>
+                <tr>
+                    <th>Session</th>
+                    <th>Date</th>
+                    <th>Reading</th>
+                    <th>Listening</th>
+                    <th>Reading Accuracy</th>
+                    <th>Listening Accuracy</th>
+                    <th>Writing</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Show Graph Button -->
+        <button class="btn" onclick="showGraph()">Show Graph</button>
+
+        <!-- Graph Display -->
+        <div class="chart-container">
+            <div id="graph"></div> <!-- Graph will be displayed here -->
+        </div>
+
+        <!-- Download CSV -->
+        <button class="btn btn-danger" onclick="downloadCSV()">Download CSV</button>
+    </div>
+
+    <script>
+        // Load data from localStorage
+        function loadData() {
+            const data = localStorage.getItem('scores');
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Save data to localStorage
+        function saveToLocalStorage(data) {
+            localStorage.setItem('scores', JSON.stringify(data));
+        }
+
+        // Calculate accuracy
+        function calculateAccuracy(reading, listening) {
+            const readingAccuracy = (parseInt(reading) / 41) * 100;
+            const listeningAccuracy = (parseInt(listening) / 29) * 100;
+            return [readingAccuracy.toFixed(2) + '%', listeningAccuracy.toFixed(2) + '%'];
+        }
+
+        // Save data
+        function saveData() {
+            const session = document.getElementById('session').value;
+            const date = document.getElementById('date').value;
+            const reading = document.getElementById('reading').value;
+            const listening = document.getElementById('listening').value;
+            const writing = document.getElementById('writing').value;
+
+            if (!session || !date || !reading || !listening || !writing) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            const [readingAcc, listeningAcc] = calculateAccuracy(reading, listening);
+
+            const scores = loadData();
+            scores.push([session, date, reading, listening, readingAcc, listeningAcc, writing]);
+            saveToLocalStorage(scores);
+
+            updateTable(); // Ensure table is updated after saving data
+            clearFields();
+        }
+
+        // Clear fields
+        function clearFields() {
+            document.getElementById('session').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('reading').value = '';
+            document.getElementById('listening').value = '';
+            document.getElementById('writing').value = '';
+        }
+
+        // Update table
+        function updateTable() {
+            const scores = loadData();
+            const tableBody = document.querySelector('#score-table tbody');
+            tableBody.innerHTML = '';  // Clear previous table rows
+
+            scores.forEach((score, index) => {
+                const row = document.createElement('tr');
+                score.forEach((cell, idx) => {
+                    // Avoid displaying memo (index 7), adjust column display
+                    if (idx !== 7) {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        row.appendChild(td);
+                    }
+                });
+
+                const actionCell = document.createElement('td');
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('btn', 'btn-danger');
+                deleteButton.onclick = () => deleteData(index);
+                actionCell.appendChild(deleteButton);
+                row.appendChild(actionCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Delete data
+        function deleteData(index) {
+            const scores = loadData();
+            scores.splice(index, 1);
+            saveToLocalStorage(scores);
+            updateTable();
+        }
+
+        // Show graph
+        function showGraph() {
+            const scores = loadData();
+            if (scores.length === 0) {
+                alert("No data available for graph.");
+                return;
+            }
+
+            const dates = [];
+            const readingAccs = [];
+            const listeningAccs = [];
+
+            scores.forEach(score => {
+                dates.push(score[1]); // Date from data
+                readingAccs.push(parseFloat(score[4])); // Reading Accuracy
+                listeningAccs.push(parseFloat(score[5])); // Listening Accuracy
+            });
+
+            const trace1 = {
+                x: dates,
+                y: readingAccs,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Reading Accuracy',
+                line: { color: 'blue' },
+            };
+
+            const trace2 = {
+                x: dates,
+                y: listeningAccs,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Listening Accuracy',
+                line: { color: 'green' },
+            };
+
+            const layout = {
+                title: 'Reading and Listening Accuracy Over Time',
+                xaxis: { title: 'Date' },
+                yaxis: {
+                    title: 'Accuracy (%)',
+                    range: [0, 100],
+                },
+                shapes: [
+                    {
+                        type: 'line',
+                        x0: 0,
+                        x1: 1,
+                        xref: 'paper',
+                        y0: 70,
+                        y1: 70,
+                        line: { color: 'red', width: 2, dash: 'dash' }
+                    }
+                ],
+            };
+
+            const data = [trace1, trace2];
+            Plotly.newPlot('graph', data, layout); // Draw or update the graph
+        }
+
+        // Download CSV
+        function downloadCSV() {
+            const scores = loadData();
+            const header = ['Session', 'Date', 'Reading', 'Listening', 'Reading Accuracy', 'Listening Accuracy', 'Writing'];
+            const rows = scores.map(score => score.join(','));
+            const csvContent = header.join(',') + '\n' + rows.join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            saveAs(blob, 'eiken_scores.csv');
+        }
+
+        // Initialize table
+        updateTable();
+    </script>
+
+</body>
+
+</html>
