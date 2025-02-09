@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>//ページの内容ではない、ページの設定を行う
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eiken Score Management</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>//グラフ描画ライブラリ
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>//グラフ描画ライブラリ
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>//ファイル保存ライブラリ
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,10 +54,16 @@
             height: 400px;
             width: 100%;
         }
+
+        .affiliate-disclaimer {
+            font-size: 12px;
+            color: #555;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
-<body>//ページの内容を記述
+<body>
 
     <div class="container">
         <h1>Eiken Score Management</h1>
@@ -119,6 +125,11 @@
         <a href="https://amzn.to/4aSIZAU" target="_blank">
             <button class="btn">Go to Amazon</button>
         </a>
+
+        <!-- Amazon Associate Disclaimer -->
+        <div class="affiliate-disclaimer">
+            <p>As an Amazon Associate, I earn from qualifying purchases. Your support helps me to maintain the site.</p>
+        </div>
     </div>
 
     <script>
