@@ -4,7 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eiken Score Management</title>
+    <meta name="description"
+        content="Manage your Eiken test scores effectively with this tool. Track your progress, calculate accuracy, and download reports.">
+    <meta name="keywords"
+        content="Eiken, score management, test scores, English proficiency, learning tool, accuracy tracker">
+    <meta name="author" content="Sam Ashina">
+    <meta name="robots" content="index, follow">
+    <title>Eiken Score Management - Track and Improve Your English Test Scores</title>
+    <link rel="canonical" href="https://yamasho0419.github.io/eiken-score-management/">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -12,11 +19,17 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
+            background-color: #f9f9f9;
         }
 
         .container {
             max-width: 1200px;
             margin: auto;
+        }
+
+        h1,
+        h2 {
+            color: #333;
         }
 
         #score-table {
@@ -66,31 +79,34 @@
 <body>
 
     <div class="container">
-        <h1>Eiken Score Management</h1>
+        <h1>Eiken Score Management Tool</h1>
 
-        <!-- Score Input -->
+        <p>Track and manage your Eiken test scores efficiently with this easy-to-use tool. Input your scores, see your
+            accuracy, and visualize your progress over time.</p>
+
+        <!-- Score Input Section -->
         <div>
-            <h2>Score Input</h2>
+            <h2>Input Your Scores</h2>
             <label for="session">Exam Session: </label>
-            <input type="text" id="session" /><br>
+            <input type="text" id="session" placeholder="e.g., 2025 Summer"><br>
 
             <label for="date">Exam Date (YYYY-MM-DD): </label>
             <input type="date" id="date" /><br>
 
-            <label for="reading">Reading (41 questions): </label>
-            <input type="number" id="reading" /><br>
+            <label for="reading">Reading Score (41 questions): </label>
+            <input type="number" id="reading" min="0" max="41" placeholder="0-41"><br>
 
-            <label for="listening">Listening (29 questions): </label>
-            <input type="number" id="listening" /><br>
+            <label for="listening">Listening Score (29 questions): </label>
+            <input type="number" id="listening" min="0" max="29" placeholder="0-29"><br>
 
-            <label for="writing">Writing: </label>
-            <input type="text" id="writing" /><br><br>
+            <label for="writing">Writing Score: </label>
+            <input type="text" id="writing" placeholder="e.g., 23/30"><br><br>
 
             <button class="btn" onclick="saveData()">Save Score</button>
             <button class="btn" onclick="clearFields()">Clear Fields</button>
         </div>
 
-        <!-- Score Table -->
+        <!-- Score History Table -->
         <h2>Score History</h2>
         <table id="score-table">
             <thead>
@@ -118,17 +134,17 @@
             <div id="graph"></div> <!-- Graph will be displayed here -->
         </div>
 
-        <!-- Download CSV -->
+        <!-- Download CSV Button -->
         <button class="btn btn-danger" onclick="downloadCSV()">Download CSV</button>
 
-        <!-- Google Link Button -->
+        <!-- Amazon Associate Link -->
         <a href="https://amzn.to/4aSIZAU" target="_blank">
             <button class="btn">Go to Amazon</button>
         </a>
 
         <!-- Amazon Associate Disclaimer -->
         <div class="affiliate-disclaimer">
-            <p>As an Amazon Associate, I earn from qualifying purchases. Your support helps me to maintain the site.</p>
+            <p>As an Amazon Associate, I earn from qualifying purchases. Your support helps maintain the site.</p>
         </div>
     </div>
 
@@ -192,7 +208,6 @@
             scores.forEach((score, index) => {
                 const row = document.createElement('tr');
                 score.forEach((cell, idx) => {
-                    // Avoid displaying memo (index 7), adjust column display
                     if (idx !== 7) {
                         const td = document.createElement('td');
                         td.textContent = cell;
@@ -233,9 +248,9 @@
             const listeningAccs = [];
 
             scores.forEach(score => {
-                dates.push(score[1]); // Date from data
-                readingAccs.push(parseFloat(score[4])); // Reading Accuracy
-                listeningAccs.push(parseFloat(score[5])); // Listening Accuracy
+                dates.push(score[1]);
+                readingAccs.push(parseFloat(score[4]));
+                listeningAccs.push(parseFloat(score[5]));
             });
 
             const trace1 = {
@@ -277,7 +292,7 @@
             };
 
             const data = [trace1, trace2];
-            Plotly.newPlot('graph', data, layout); // Draw or update the graph
+            Plotly.newPlot('graph', data, layout);
         }
 
         // Download CSV
